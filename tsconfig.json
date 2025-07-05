@@ -1,0 +1,19 @@
+{
+  "extends": "@tsconfig/recommended/tsconfig.json",
+  "include": ["src/**/*", "environment.d.ts"],
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["*"]
+    },
+    "target": "ES2024",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "module": "esnext",
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "outDir": "./dist",
+    "baseUrl": "./src",
+    "noUnusedLocals": true
+  }
+}

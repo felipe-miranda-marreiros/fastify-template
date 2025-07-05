@@ -1,0 +1,80 @@
+services:
+  app:
+    container_name: ${APP_CONTAINER_NAME}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '${APP_PORT:-3000}:3000'
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - db
+      - redis
+      - permit_pdp
+    env_file:
+      - .env
+    restart: unless-stopped
+  db:
+    image: postgres:latest
+    container_name: ${POSTGRES_CONTAINER_NAME}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: ${PGADMIN_CONTAINER_NAME}
+    depends_on:
+      - db
+    restart: unless-stopped
+    ports:
+      - '${PGADMIN_PORT:-5050}:80'
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+  redis:
+    image: redis:7-alpine
+    container_name: ${REDIS_CONTAINER_NAME}
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+  redis_insight:
+    container_name: ${REDIS_INSIGHT_CONTAINER_NAME}
+    image: redis/redisinsight:latest
+    ports:
+      - '${REDIS_INSIGHT_PORT:-5540}:5540'
+    depends_on:
+      - redis
+    restart: unless-stopped
+  permit_pdp:
+    container_name: permit_pdp
+    image: permitio/pdp-v2:latest
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    ports:
+      - '7766:7000'
+    environment:
+      - PDP_API_KEY=permit_key_HrvCJTFeA4mcOVvG6JsfmhEhkX7i2gWrjso6REFwXToleRYbSxcgUrLsYmghltAekYB6vQ62h8528epcG21brE
+      - PDP_DEBUG=True
+    restart: unless-stopped
+
+networks:
+  default:
+    driver: bridge
+
+volumes:
+  pg_data:
+  pgadmin_data:
+  redis_data:
