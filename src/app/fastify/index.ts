@@ -5,6 +5,7 @@ import { log } from '@/infrastructure/logger'
 import fastifyCors from '@fastify/cors'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUi from '@fastify/swagger-ui'
+import fastifyRateLimit from '@fastify/rate-limit'
 import {
   jsonSchemaTransform,
   serializerCompiler,
@@ -22,6 +23,12 @@ fastify.register(fastifyCors, {
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   credentials: true,
   maxAge: 86400
+})
+
+fastify.register(fastifyRateLimit, {
+  global: true,
+  max: 100,
+  timeWindow: '1 minute'
 })
 
 fastify.setValidatorCompiler(validatorCompiler)
@@ -72,6 +79,11 @@ fastify.register(publicRoutes)
 fastify.register(protectedRoutes)
 
 // 404
-fastify.setNotFoundHandler((_, reply) => {
-  reply.status(404).send({ error: 'Rota não encontrada' })
-})
+fastify.setNotFoundHandler(
+  {
+    preHandler: () => fastify.rateLimit()
+  },
+  function (request, reply) {
+    reply.code(404).send({ hello: 'Not found' })
+  }
+)
