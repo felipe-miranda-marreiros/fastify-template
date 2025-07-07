@@ -58,15 +58,15 @@ services:
       - redis
     restart: unless-stopped
   permit_pdp:
-    container_name: permit_pdp
+    container_name: ${PERMIT_CONTAINER_NAME}
     image: permitio/pdp-v2:latest
     dns:
       - 8.8.8.8
       - 1.1.1.1
     ports:
-      - '7766:7000'
+      - '${PERMIT_PORT:-7766}:7000'
     environment:
-      - PDP_API_KEY=permit_key_HrvCJTFeA4mcOVvG6JsfmhEhkX7i2gWrjso6REFwXToleRYbSxcgUrLsYmghltAekYB6vQ62h8528epcG21brE
+      - PDP_API_KEY=${PERMIT_TOKEN}
       - PDP_DEBUG=True
     restart: unless-stopped
 
