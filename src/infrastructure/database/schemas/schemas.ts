@@ -1,13 +1,21 @@
-import { boolean, integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import {
+  boolean,
+  doublePrecision,
+  integer,
+  pgTable,
+  text,
+  timestamp,
+  varchar
+} from 'drizzle-orm/pg-core'
 
-// const baseSchema = {
-//   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-//   created_at: timestamp().notNull().defaultNow(),
-//   updated_at: timestamp()
-//     .defaultNow()
-//     .$onUpdate(() => new Date())
-//     .notNull()
-// }
+const baseSchema = {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  created_at: timestamp().notNull().defaultNow(),
+  updated_at: timestamp()
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull()
+}
 
 export const users = pgTable('users', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -68,3 +76,12 @@ export const verifications = pgTable('verifications', {
     () => /* @__PURE__ */ new Date()
   )
 })
+
+export const products = pgTable('products', {
+  ...baseSchema,
+  price: doublePrecision().notNull(),
+  title: varchar({ length: 255 }).notNull(),
+  description: text().notNull()
+})
+
+export type ProductPersistence = typeof products.$inferSelect
