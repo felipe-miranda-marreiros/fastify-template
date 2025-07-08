@@ -12,6 +12,7 @@ import {
   validatorCompiler,
   ZodTypeProvider
 } from 'fastify-type-provider-zod'
+import { CustomError } from '@/shared/errors'
 
 export const fastify = Fastify({
   loggerInstance: log
@@ -69,7 +70,8 @@ fastify.register(fastifySwagger, {
 })
 
 fastify.register(fastifySwaggerUi, {
-  routePrefix: '/docs'
+  routePrefix: '/docs',
+  staticCSP: true
 })
 
 // Rotas públicas
@@ -87,3 +89,10 @@ fastify.setNotFoundHandler(
     reply.code(404).send({ hello: 'Not found' })
   }
 )
+
+fastify.setErrorHandler((error, request, reply) => {
+  if (error instanceof CustomError) {
+    reply.status(error.statusCode).send({ errors: error.serializeErrors() })
+  }
+  reply.status(500).send({ ok: false })
+})
